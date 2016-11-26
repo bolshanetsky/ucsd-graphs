@@ -24,10 +24,10 @@ import util.GraphLoader;
  */
 public class MapGraph {
 
+	private static final double AVERAGE_SPEED = 50;
 	private Set<Node> verticies;
-//	private Set<GeographicPoint> verticies;
-    private Set<Edge> edges;
-    private Map<Node, List<Edge>> adjacencyList;
+	private Set<Edge> edges;
+	private Map<Node, List<Edge>> adjacencyList;
 
 	/** 
 	 * Create a new empty MapGraph 
@@ -307,12 +307,12 @@ public class MapGraph {
 					return generateNodePath(current, parentMap);
 				}
 
-				Map<Node, Double> neighbors = getNodeNeighborsWithDistance(current);
+				Map<Node, Double> neighbors = getNodeNeighborsWithTimeToDriveThrough(current);
 				for (Map.Entry<Node, Double> neighbor : neighbors.entrySet()) {
 
 					Node neighborNode = neighbor.getKey();
-					Double neighborDistanceToCurrent = neighbor.getValue();
-					Double distanceFromStart = current.getDistance() + neighborDistanceToCurrent;
+					Double neighborTimeToDriveThrough = neighbor.getValue();
+					Double distanceFromStart = current.getDistance() + neighborTimeToDriveThrough;
 
 					if (!visited.contains(neighborNode) && (neighborNode.getPriority()) > distanceFromStart) {
 						neighborNode.setDistance(distanceFromStart);
@@ -338,6 +338,22 @@ public class MapGraph {
             for (Edge edge: edges) {
                 Node neighborNode = verticies.stream().filter(node -> node.equals(new Node(edge.getToPoint()))).findFirst().get();
                 result.put(neighborNode, edge.getLength());
+            }
+            return result;
+        }
+    }
+
+    private Map<Node, Double> getNodeNeighborsWithTimeToDriveThrough(Node current) {
+
+        if (adjacencyList.get(current) == null) {
+            return new HashMap<>();
+        } else {
+            List<Edge> edges = adjacencyList.get(current);
+            Map<Node, Double> result = new HashMap<>();
+
+            for (Edge edge: edges) {
+                Node neighborNode = verticies.stream().filter(node -> node.equals(new Node(edge.getToPoint()))).findFirst().get();
+                result.put(neighborNode, edge.getTimeToDriveThrough());
             }
             return result;
         }
@@ -396,14 +412,14 @@ public class MapGraph {
 					return generateNodePath(current, parentMap);
 				}
 
-				Map<Node, Double> neighbors = getNodeNeighborsWithDistance(current);
+				Map<Node, Double> neighbors = getNodeNeighborsWithTimeToDriveThrough(current);
 				for (Map.Entry<Node, Double> neighbor : neighbors.entrySet()) {
 
 					Node neighborNode = neighbor.getKey();
-					Double neighborDistanceToCurrent = neighbor.getValue();
-					Double distanceFromStart = current.getDistance() + neighborDistanceToCurrent;
+					Double neighborTimeToDriveThrough = neighbor.getValue();
+					Double distanceFromStart = current.getDistance() + neighborTimeToDriveThrough;
 					Double estimatedPriority = distanceFromStart
-							+ neighborNode.getLocation().distance(goalNode.getLocation());
+							+ neighborNode.getLocation().distance(goalNode.getLocation()) / AVERAGE_SPEED;
 
 					if (!visited.contains(neighborNode) && (neighborNode.getPriority()) > estimatedPriority) {
 						double test = neighborNode.getDistance();
@@ -414,9 +430,9 @@ public class MapGraph {
 					}
 				}
 			}
-        }
+		}
 
-        return null;
+		return null;
 	}
 
 	

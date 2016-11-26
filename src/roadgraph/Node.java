@@ -15,11 +15,6 @@ public class Node implements Comparable<Node> {
         this.priority = Double.MAX_VALUE;
     }
 
-    public Node (GeographicPoint location, double distance) {
-        this.location = location;
-        this.distance = distance;
-    }
-
     public GeographicPoint getLocation() {
         return this.location;
     }
